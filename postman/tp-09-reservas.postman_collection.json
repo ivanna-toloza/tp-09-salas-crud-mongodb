@@ -1,0 +1,1432 @@
+{
+  "info": {
+    "name": "TP 09 - Reservas de salas (CRUD con MongoDB)",
+    "description": "Recorrido del TP 09: crear, consultar, reemplazar (PUT), cambiar parcialmente (PATCH) y eliminar (DELETE) reservas. Enviar cada solicitud de a una con \"Send\", en orden (no usar el Runner: hay escrituras y una eliminación). El POST de la carpeta 1 guarda el id en la variable idReserva; el de la carpeta 5 guarda idEliminar. Cambiar baseUrl si el servidor usa otro puerto. Datos ficticios, sin secretos.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "idReserva",
+      "value": ""
+    },
+    {
+      "key": "idEliminar",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Contrato conservado (POST y GET)",
+      "item": [
+        {
+          "name": "GET listado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Es un arreglo\", () => pm.expect(pm.response.json()).to.be.an(\"array\"));",
+                  "console.log(\"Cantidad:\", pm.response.json().length);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas"
+              ]
+            },
+            "description": "Sigue siendo un arreglo, sin metadatos. Anotar la cantidad."
+          }
+        },
+        {
+          "name": "POST crear reserva de trabajo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado 201\", () => pm.response.to.have.status(201));",
+                  "const reserva = pm.response.json();",
+                  "pm.test(\"Tiene Location\", () => pm.response.to.have.header(\"Location\"));",
+                  "pm.test(\"Estado pendiente por default\", () => pm.expect(reserva.estado).to.eql(\"pendiente\"));",
+                  "pm.collectionVariables.set(\"idReserva\", reserva.id);",
+                  "console.log(\"Location:\", pm.response.headers.get(\"Location\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas"
+              ]
+            },
+            "description": "Pulsar Send UNA sola vez. Guarda el id en idReserva. Revisar Location en los Headers de la respuesta.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estudiante\": \"Ana Ejemplo\",\n  \"email\": \"ana@example.com\",\n  \"sala\": \"Sala Norte\",\n  \"fecha\": \"2026-10-28\",\n  \"turno\": \"Mañana\",\n  \"personas\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "GET reserva de trabajo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Mismo id\", () => pm.expect(pm.response.json().id).to.eql(pm.collectionVariables.get(\"idReserva\")));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas/{{idReserva}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas",
+                "{{idReserva}}"
+              ]
+            },
+            "description": "Referencia para comparar antes y después de cada cambio. Reenviarla después de cada PUT, PATCH o rechazo."
+          }
+        },
+        {
+          "name": "GET ID mal formado (abc)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas/abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas",
+                "abc"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET ID válido inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas/000000000000000000000000",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas",
+                "000000000000000000000000"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. PUT - reemplazo completo",
+      "item": [
+        {
+          "name": "PUT completo (estado confirmada)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Mismo id\", () => pm.expect(r.id).to.eql(pm.collectionVariables.get(\"idReserva\")));",
+                  "pm.test(\"Estado confirmada\", () => pm.expect(r.estado).to.eql(\"confirmada\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas/{{idReserva}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas",
+                "{{idReserva}}"
+              ]
+            },
+            "description": "Los siete campos editables. Esperar 200, el mismo id y los siete valores enviados.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estudiante\": \"Ana Ejemplo\",\n  \"email\": \"ana@example.com\",\n  \"sala\": \"Sala Norte\",\n  \"fecha\": \"2026-10-28\",\n  \"turno\": \"Mañana\",\n  \"personas\": 2,\n  \"estado\": \"confirmada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. PATCH - cambios parciales",
+      "item": [
+        {
+          "name": "PATCH personas 3",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Personas 3\", () => pm.expect(r.personas).to.eql(3));",
+                  "pm.test(\"Conserva el estado confirmada\", () => pm.expect(r.estado).to.eql(\"confirmada\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas/{{idReserva}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas",
+                "{{idReserva}}"
+              ]
+            },
+            "description": "Solo personas. El estado (confirmada) y los otros campos se conservan.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"personas\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "PATCH estado pendiente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Estado pendiente\", () => pm.expect(r.estado).to.eql(\"pendiente\"));",
+                  "pm.test(\"Conserva personas 3\", () => pm.expect(r.personas).to.eql(3));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas/{{idReserva}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas",
+                "{{idReserva}}"
+              ]
+            },
+            "description": "Solo estado. Personas (3) se conserva.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"pendiente\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Rechazos (400/404, sin modificar ni crear)",
+      "item": [
+        {
+          "name": "PUT incompleto (sin estado)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas/{{idReserva}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas",
+                "{{idReserva}}"
+              ]
+            },
+            "description": "Después de enviarla, abrir \"GET reserva de trabajo\" y comprobar que no cambió nada (mismo estado y personas que en el último cambio válido).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estudiante\": \"Ana Ejemplo\",\n  \"email\": \"ana@example.com\",\n  \"sala\": \"Sala Norte\",\n  \"fecha\": \"2026-10-28\",\n  \"turno\": \"Mañana\",\n  \"personas\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "PUT estado inválido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas/{{idReserva}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas",
+                "{{idReserva}}"
+              ]
+            },
+            "description": "Después de enviarla, abrir \"GET reserva de trabajo\" y comprobar que no cambió nada (mismo estado y personas que en el último cambio válido).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estudiante\": \"Ana Ejemplo\",\n  \"email\": \"ana@example.com\",\n  \"sala\": \"Sala Norte\",\n  \"fecha\": \"2026-10-28\",\n  \"turno\": \"Mañana\",\n  \"personas\": 2,\n  \"estado\": \"cancelada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "PATCH vacío",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas/{{idReserva}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas",
+                "{{idReserva}}"
+              ]
+            },
+            "description": "Después de enviarla, abrir \"GET reserva de trabajo\" y comprobar que no cambió nada (mismo estado y personas que en el último cambio válido).",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "PATCH campo no permitido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas/{{idReserva}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas",
+                "{{idReserva}}"
+              ]
+            },
+            "description": "Después de enviarla, abrir \"GET reserva de trabajo\" y comprobar que no cambió nada (mismo estado y personas que en el último cambio válido).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estudiante\": \"Otro nombre\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "PATCH con _id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas/{{idReserva}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas",
+                "{{idReserva}}"
+              ]
+            },
+            "description": "Después de enviarla, abrir \"GET reserva de trabajo\" y comprobar que no cambió nada (mismo estado y personas que en el último cambio válido).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"_id\": \"000000000000000000000001\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "PATCH con $set",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas/{{idReserva}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas",
+                "{{idReserva}}"
+              ]
+            },
+            "description": "Después de enviarla, abrir \"GET reserva de trabajo\" y comprobar que no cambió nada (mismo estado y personas que en el último cambio válido).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"$set\": {\n    \"personas\": 1\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "PATCH personas 0",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas/{{idReserva}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas",
+                "{{idReserva}}"
+              ]
+            },
+            "description": "Después de enviarla, abrir \"GET reserva de trabajo\" y comprobar que no cambió nada (mismo estado y personas que en el último cambio válido).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"personas\": 0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "PATCH personas 7",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas/{{idReserva}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas",
+                "{{idReserva}}"
+              ]
+            },
+            "description": "Después de enviarla, abrir \"GET reserva de trabajo\" y comprobar que no cambió nada (mismo estado y personas que en el último cambio válido).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"personas\": 7\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "PATCH personas 2.5",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas/{{idReserva}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas",
+                "{{idReserva}}"
+              ]
+            },
+            "description": "Después de enviarla, abrir \"GET reserva de trabajo\" y comprobar que no cambió nada (mismo estado y personas que en el último cambio válido).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"personas\": 2.5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "PATCH personas true",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas/{{idReserva}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas",
+                "{{idReserva}}"
+              ]
+            },
+            "description": "Después de enviarla, abrir \"GET reserva de trabajo\" y comprobar que no cambió nada (mismo estado y personas que en el último cambio válido).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"personas\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "PATCH personas arreglo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas/{{idReserva}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas",
+                "{{idReserva}}"
+              ]
+            },
+            "description": "Después de enviarla, abrir \"GET reserva de trabajo\" y comprobar que no cambió nada (mismo estado y personas que en el último cambio válido).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"personas\": [\n    3\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "PATCH personas objeto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas/{{idReserva}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas",
+                "{{idReserva}}"
+              ]
+            },
+            "description": "Después de enviarla, abrir \"GET reserva de trabajo\" y comprobar que no cambió nada (mismo estado y personas que en el último cambio válido).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"personas\": {\n    \"cantidad\": 3\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "PATCH estado inválido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas/{{idReserva}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas",
+                "{{idReserva}}"
+              ]
+            },
+            "description": "Después de enviarla, abrir \"GET reserva de trabajo\" y comprobar que no cambió nada (mismo estado y personas que en el último cambio válido).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"cancelada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "PATCH cuerpo arreglo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas/{{idReserva}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas",
+                "{{idReserva}}"
+              ]
+            },
+            "description": "Después de enviarla, abrir \"GET reserva de trabajo\" y comprobar que no cambió nada (mismo estado y personas que en el último cambio válido).",
+            "body": {
+              "mode": "raw",
+              "raw": "[\n  {\n    \"personas\": 3\n  }\n]",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "PATCH sin cuerpo (Body none)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas/{{idReserva}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas",
+                "{{idReserva}}"
+              ]
+            },
+            "description": "Body en none. Después de enviarla, abrir \"GET reserva de trabajo\" y comprobar que no cambió nada (mismo estado y personas que en el último cambio válido)."
+          }
+        },
+        {
+          "name": "PATCH JSON mal formado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas/{{idReserva}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas",
+                "{{idReserva}}"
+              ]
+            },
+            "description": "Después de enviarla, abrir \"GET reserva de trabajo\" y comprobar que no cambió nada (mismo estado y personas que en el último cambio válido).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"personas\": }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "PATCH ID mal formado (abc)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas/abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas",
+                "abc"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"personas\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "PUT ID válido inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas/000000000000000000000000",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas",
+                "000000000000000000000000"
+              ]
+            },
+            "description": "upsert: false. Después, \"GET listado\": la cantidad no aumenta.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estudiante\": \"Ana Ejemplo\",\n  \"email\": \"ana@example.com\",\n  \"sala\": \"Sala Norte\",\n  \"fecha\": \"2026-10-28\",\n  \"turno\": \"Mañana\",\n  \"personas\": 2,\n  \"estado\": \"confirmada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "PATCH ID válido inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas/000000000000000000000000",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas",
+                "000000000000000000000000"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"personas\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. DELETE - eliminación física",
+      "item": [
+        {
+          "name": "POST crear reserva para eliminar",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"idEliminar\", pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas"
+              ]
+            },
+            "description": "Documento de ejercicio que se va a eliminar. Guarda su id en idEliminar.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estudiante\": \"Carla Ejemplo\",\n  \"email\": \"carla@example.com\",\n  \"sala\": \"Sala Sur\",\n  \"fecha\": \"2026-10-29\",\n  \"turno\": \"Tarde\",\n  \"personas\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "GET objetivo antes de borrar",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas/{{idEliminar}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas",
+                "{{idEliminar}}"
+              ]
+            },
+            "description": "Verificar el objetivo por GET antes de borrar. Anotar la cantidad con GET listado."
+          }
+        },
+        {
+          "name": "DELETE reserva elegida",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado 204\", () => pm.response.to.have.status(204));",
+                  "pm.test(\"Cuerpo vacío\", () => pm.expect(pm.response.text()).to.eql(\"\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas/{{idEliminar}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas",
+                "{{idEliminar}}"
+              ]
+            },
+            "description": "Body none. Esperar 204 No Content y cuerpo vacío."
+          }
+        },
+        {
+          "name": "GET después de borrar",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas/{{idEliminar}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas",
+                "{{idEliminar}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "DELETE repetido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas/{{idEliminar}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas",
+                "{{idEliminar}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET listado (una menos)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado 200\", () => pm.response.to.have.status(200));",
+                  "console.log(\"Cantidad:\", pm.response.json().length);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas"
+              ]
+            },
+            "description": "La cantidad tiene que ser una menos que antes del DELETE. La reserva de trabajo sigue."
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Sitio y rutas",
+      "item": [
+        {
+          "name": "GET /estado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado 200\", () => pm.response.to.have.status(200));",
+                  "console.log(\"Reservas en MongoDB:\", pm.response.json().reservas);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/estado",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "estado"
+              ]
+            },
+            "description": "reservas tiene que coincidir con la cantidad de GET listado."
+          }
+        },
+        {
+          "name": "GET ruta API inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/no-existe",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "no-existe"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,698 @@
+Registro de pruebas - TP 09 Reservas de salas (CRUD con MongoDB)
+Fecha: 29/10/2026, 20:01:06
+Servidor: node --env-file=.env src/index.js  (http://localhost:3000)
+Base: reservas_salas_u9 / colección reservas (MongoDB Atlas Free M0)
+Datos ficticios. Sin URI ni credenciales.
+Cada rechazo de escritura se comprueba con un GET posterior del mismo ID
+y con la cantidad del listado antes y después.
+
+==============================================================================
+A. Primer arranque (base nueva de la unidad 9)
+==============================================================================
+    consola> Aplicación disponible en http://localhost:3000
+
+==============================================================================
+B. Creación (POST) y consulta por ID: contrato conservado del TP 08
+==============================================================================
+
+[1] GET http://localhost:3000/api/reservas   (listado inicial)
+    Estado: 200   Content-Type respuesta: application/json
+    Cantidad: 0
+
+[2] POST http://localhost:3000/api/reservas   (creación válida, enviada una sola vez)
+    Content-Type: application/json
+    Body: {"estudiante":"Ana Ejemplo","email":"ana@example.com","sala":"Sala Norte","fecha":"2026-10-28","turno":"Mañana","personas":2}
+    Estado: 201   Content-Type respuesta: application/json
+    Location: /api/reservas/6ae3d0342e7f273418e9de1c
+    Respuesta: {"id":"6ae3d0342e7f273418e9de1c","estudiante":"Ana Ejemplo","email":"ana@example.com","sala":"Sala Norte","fecha":"2026-10-28","turno":"Mañana","personas":2,"estado":"pendiente"}
+
+[3] GET http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (URL recibida en Location)
+    Estado: 200   Content-Type respuesta: application/json
+    Respuesta: {"id":"6ae3d0342e7f273418e9de1c","estudiante":"Ana Ejemplo","email":"ana@example.com","sala":"Sala Norte","fecha":"2026-10-28","turno":"Mañana","personas":2,"estado":"pendiente"}
+    ¿Mismo recurso que la respuesta del POST? sí
+
+[4] POST http://localhost:3000/api/reservas   (POST con estado y _id del cliente: se ignoran)
+    Content-Type: application/json
+    Body: {"estudiante":"Carla Ejemplo","email":"carla@example.com","sala":"Sala Sur","fecha":"2026-10-29","turno":"Tarde","personas":3,"estado":"confirmada","_id":"000000000000000000000001"}
+    Estado: 201   Content-Type respuesta: application/json
+    Location: /api/reservas/6ae3d0342e7f273418e9de1d
+    Respuesta: {"id":"6ae3d0342e7f273418e9de1d","estudiante":"Carla Ejemplo","email":"carla@example.com","sala":"Sala Sur","fecha":"2026-10-29","turno":"Tarde","personas":3,"estado":"pendiente"}
+
+[5] GET http://localhost:3000/api/reservas   (cantidad después de los dos POST)
+    Estado: 200   Content-Type respuesta: application/json
+    Cantidad: 2
+
+==============================================================================
+C. PUT: reemplazo completo (siete campos editables)
+==============================================================================
+
+[6] PUT http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (seis campos anteriores + estado confirmada)
+    Content-Type: application/json
+    Body: {"estudiante":"Ana Ejemplo","email":"ana@example.com","sala":"Sala Norte","fecha":"2026-10-28","turno":"Mañana","personas":2,"estado":"confirmada"}
+    Estado: 200   Content-Type respuesta: application/json
+    Respuesta: {"id":"6ae3d0342e7f273418e9de1c","estudiante":"Ana Ejemplo","email":"ana@example.com","sala":"Sala Norte","fecha":"2026-10-28","turno":"Mañana","personas":2,"estado":"confirmada"}
+    ¿Mismo ID? sí
+
+[7] GET http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (GET posterior al PUT)
+    Estado: 200   Content-Type respuesta: application/json
+    Respuesta: {"id":"6ae3d0342e7f273418e9de1c","estudiante":"Ana Ejemplo","email":"ana@example.com","sala":"Sala Norte","fecha":"2026-10-28","turno":"Mañana","personas":2,"estado":"confirmada"}
+    ¿El GET muestra lo mismo que respondió el PUT? sí
+
+[8] GET http://localhost:3000/api/reservas   (cantidad después del PUT (no crea))
+    Estado: 200   Content-Type respuesta: application/json
+    Cantidad: 2
+
+==============================================================================
+D. PATCH: cambios parciales (solo personas y estado)
+==============================================================================
+
+[9] PATCH http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (solo personas)
+    Content-Type: application/json
+    Body: {"personas":3}
+    Estado: 200   Content-Type respuesta: application/json
+    Respuesta: {"id":"6ae3d0342e7f273418e9de1c","estudiante":"Ana Ejemplo","email":"ana@example.com","sala":"Sala Norte","fecha":"2026-10-28","turno":"Mañana","personas":3,"estado":"confirmada"}
+    ¿Conserva estado "confirmada" y los otros cinco campos? sí
+
+[10] PATCH http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (solo estado)
+    Content-Type: application/json
+    Body: {"estado":"pendiente"}
+    Estado: 200   Content-Type respuesta: application/json
+    Respuesta: {"id":"6ae3d0342e7f273418e9de1c","estudiante":"Ana Ejemplo","email":"ana@example.com","sala":"Sala Norte","fecha":"2026-10-28","turno":"Mañana","personas":3,"estado":"pendiente"}
+    ¿Conserva personas 3? sí
+
+[11] PATCH http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (personas como texto numérico "4" + estado)
+    Content-Type: application/json
+    Body: {"personas":"4","estado":"confirmada"}
+    Estado: 200   Content-Type respuesta: application/json
+    Respuesta: {"id":"6ae3d0342e7f273418e9de1c","estudiante":"Ana Ejemplo","email":"ana@example.com","sala":"Sala Norte","fecha":"2026-10-28","turno":"Mañana","personas":4,"estado":"confirmada"}
+    personas quedó como number (4)
+
+[12] GET http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (GET posterior a los PATCH)
+    Estado: 200   Content-Type respuesta: application/json
+    Respuesta: {"id":"6ae3d0342e7f273418e9de1c","estudiante":"Ana Ejemplo","email":"ana@example.com","sala":"Sala Norte","fecha":"2026-10-28","turno":"Mañana","personas":4,"estado":"confirmada"}
+    ¿El GET muestra el último estado? sí
+
+==============================================================================
+E. Rechazos de escritura: 400 sin modificación (un problema por vez)
+==============================================================================
+
+[13] PUT http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (PUT incompleto: falta estado)
+    Content-Type: application/json
+    Body: {"estudiante":"Ana Ejemplo","email":"ana@example.com","sala":"Sala Norte","fecha":"2026-10-28","turno":"Mañana","personas":2}
+    Estado: 400   Content-Type respuesta: application/json
+    Respuesta: {"error":"Revisá los campos de la actualización.","campos":["estado"]}
+
+[14] GET http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (GET de control después de: PUT incompleto: falta estado)
+    Estado: 200   Content-Type respuesta: application/json
+    ¿Recurso intacto (igual al último estado válido)? sí
+
+[15] GET http://localhost:3000/api/reservas   (cantidad después de: PUT incompleto: falta estado)
+    Estado: 200   Content-Type respuesta: application/json
+    Cantidad: 2
+
+[16] PUT http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (PUT incompleto: falta fecha)
+    Content-Type: application/json
+    Body: {"estudiante":"Ana Ejemplo","email":"ana@example.com","sala":"Sala Norte","turno":"Mañana","personas":2,"estado":"confirmada"}
+    Estado: 400   Content-Type respuesta: application/json
+    Respuesta: {"error":"Revisá los campos de la actualización.","campos":["fecha"]}
+
+[17] GET http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (GET de control después de: PUT incompleto: falta fecha)
+    Estado: 200   Content-Type respuesta: application/json
+    ¿Recurso intacto (igual al último estado válido)? sí
+
+[18] GET http://localhost:3000/api/reservas   (cantidad después de: PUT incompleto: falta fecha)
+    Estado: 200   Content-Type respuesta: application/json
+    Cantidad: 2
+
+[19] PUT http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (PUT con estado "cancelada" (fuera del enum))
+    Content-Type: application/json
+    Body: {"estudiante":"Ana Ejemplo","email":"ana@example.com","sala":"Sala Norte","fecha":"2026-10-28","turno":"Mañana","personas":2,"estado":"cancelada"}
+    Estado: 400   Content-Type respuesta: application/json
+    Respuesta: {"error":"Revisá los campos de la actualización.","campos":["estado"]}
+
+[20] GET http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (GET de control después de: PUT con estado "cancelada" (fuera del enum))
+    Estado: 200   Content-Type respuesta: application/json
+    ¿Recurso intacto (igual al último estado válido)? sí
+
+[21] GET http://localhost:3000/api/reservas   (cantidad después de: PUT con estado "cancelada" (fuera del enum))
+    Estado: 200   Content-Type respuesta: application/json
+    Cantidad: 2
+
+[22] PUT http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (PUT con sala "Sala Este")
+    Content-Type: application/json
+    Body: {"estudiante":"Ana Ejemplo","email":"ana@example.com","sala":"Sala Este","fecha":"2026-10-28","turno":"Mañana","personas":2,"estado":"confirmada"}
+    Estado: 400   Content-Type respuesta: application/json
+    Respuesta: {"error":"Revisá los campos de la actualización.","campos":["sala"]}
+
+[23] GET http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (GET de control después de: PUT con sala "Sala Este")
+    Estado: 200   Content-Type respuesta: application/json
+    ¿Recurso intacto (igual al último estado válido)? sí
+
+[24] GET http://localhost:3000/api/reservas   (cantidad después de: PUT con sala "Sala Este")
+    Estado: 200   Content-Type respuesta: application/json
+    Cantidad: 2
+
+[25] PUT http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (PUT con email sin @)
+    Content-Type: application/json
+    Body: {"estudiante":"Ana Ejemplo","email":"ana.example.com","sala":"Sala Norte","fecha":"2026-10-28","turno":"Mañana","personas":2,"estado":"confirmada"}
+    Estado: 400   Content-Type respuesta: application/json
+    Respuesta: {"error":"Revisá los campos de la actualización.","campos":["email"]}
+
+[26] GET http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (GET de control después de: PUT con email sin @)
+    Estado: 200   Content-Type respuesta: application/json
+    ¿Recurso intacto (igual al último estado válido)? sí
+
+[27] GET http://localhost:3000/api/reservas   (cantidad después de: PUT con email sin @)
+    Estado: 200   Content-Type respuesta: application/json
+    Cantidad: 2
+
+[28] PUT http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (PUT con _id extra)
+    Content-Type: application/json
+    Body: {"estudiante":"Ana Ejemplo","email":"ana@example.com","sala":"Sala Norte","fecha":"2026-10-28","turno":"Mañana","personas":2,"estado":"confirmada","_id":"000000000000000000000001"}
+    Estado: 400   Content-Type respuesta: application/json
+    Respuesta: {"error":"Revisá los campos de la actualización.","campos":["_id"]}
+
+[29] GET http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (GET de control después de: PUT con _id extra)
+    Estado: 200   Content-Type respuesta: application/json
+    ¿Recurso intacto (igual al último estado válido)? sí
+
+[30] GET http://localhost:3000/api/reservas   (cantidad después de: PUT con _id extra)
+    Estado: 200   Content-Type respuesta: application/json
+    Cantidad: 2
+
+[31] PATCH http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (PATCH vacío {})
+    Content-Type: application/json
+    Body: {}
+    Estado: 400   Content-Type respuesta: application/json
+    Respuesta: {"error":"Revisá los campos de la actualización.","campos":[]}
+
+[32] GET http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (GET de control después de: PATCH vacío {})
+    Estado: 200   Content-Type respuesta: application/json
+    ¿Recurso intacto (igual al último estado válido)? sí
+
+[33] GET http://localhost:3000/api/reservas   (cantidad después de: PATCH vacío {})
+    Estado: 200   Content-Type respuesta: application/json
+    Cantidad: 2
+
+[34] PATCH http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (PATCH con campo no permitido (estudiante))
+    Content-Type: application/json
+    Body: {"estudiante":"Otro nombre"}
+    Estado: 400   Content-Type respuesta: application/json
+    Respuesta: {"error":"Revisá los campos de la actualización.","campos":["estudiante"]}
+
+[35] GET http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (GET de control después de: PATCH con campo no permitido (estudiante))
+    Estado: 200   Content-Type respuesta: application/json
+    ¿Recurso intacto (igual al último estado válido)? sí
+
+[36] GET http://localhost:3000/api/reservas   (cantidad después de: PATCH con campo no permitido (estudiante))
+    Estado: 200   Content-Type respuesta: application/json
+    Cantidad: 2
+
+[37] PATCH http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (PATCH con _id)
+    Content-Type: application/json
+    Body: {"_id":"000000000000000000000001"}
+    Estado: 400   Content-Type respuesta: application/json
+    Respuesta: {"error":"Revisá los campos de la actualización.","campos":["_id"]}
+
+[38] GET http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (GET de control después de: PATCH con _id)
+    Estado: 200   Content-Type respuesta: application/json
+    ¿Recurso intacto (igual al último estado válido)? sí
+
+[39] GET http://localhost:3000/api/reservas   (cantidad después de: PATCH con _id)
+    Estado: 200   Content-Type respuesta: application/json
+    Cantidad: 2
+
+[40] PATCH http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (PATCH con operador $set)
+    Content-Type: application/json
+    Body: {"$set":{"personas":1}}
+    Estado: 400   Content-Type respuesta: application/json
+    Respuesta: {"error":"Revisá los campos de la actualización.","campos":["$set"]}
+
+[41] GET http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (GET de control después de: PATCH con operador $set)
+    Estado: 200   Content-Type respuesta: application/json
+    ¿Recurso intacto (igual al último estado válido)? sí
+
+[42] GET http://localhost:3000/api/reservas   (cantidad después de: PATCH con operador $set)
+    Estado: 200   Content-Type respuesta: application/json
+    Cantidad: 2
+
+[43] PATCH http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (personas 0)
+    Content-Type: application/json
+    Body: {"personas":0}
+    Estado: 400   Content-Type respuesta: application/json
+    Respuesta: {"error":"Revisá los campos de la actualización.","campos":["personas"]}
+
+[44] GET http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (GET de control después de: personas 0)
+    Estado: 200   Content-Type respuesta: application/json
+    ¿Recurso intacto (igual al último estado válido)? sí
+
+[45] GET http://localhost:3000/api/reservas   (cantidad después de: personas 0)
+    Estado: 200   Content-Type respuesta: application/json
+    Cantidad: 2
+
+[46] PATCH http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (personas 7)
+    Content-Type: application/json
+    Body: {"personas":7}
+    Estado: 400   Content-Type respuesta: application/json
+    Respuesta: {"error":"Revisá los campos de la actualización.","campos":["personas"]}
+
+[47] GET http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (GET de control después de: personas 7)
+    Estado: 200   Content-Type respuesta: application/json
+    ¿Recurso intacto (igual al último estado válido)? sí
+
+[48] GET http://localhost:3000/api/reservas   (cantidad después de: personas 7)
+    Estado: 200   Content-Type respuesta: application/json
+    Cantidad: 2
+
+[49] PATCH http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (personas 2.5)
+    Content-Type: application/json
+    Body: {"personas":2.5}
+    Estado: 400   Content-Type respuesta: application/json
+    Respuesta: {"error":"Revisá los campos de la actualización.","campos":["personas"]}
+
+[50] GET http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (GET de control después de: personas 2.5)
+    Estado: 200   Content-Type respuesta: application/json
+    ¿Recurso intacto (igual al último estado válido)? sí
+
+[51] GET http://localhost:3000/api/reservas   (cantidad después de: personas 2.5)
+    Estado: 200   Content-Type respuesta: application/json
+    Cantidad: 2
+
+[52] PATCH http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (personas true)
+    Content-Type: application/json
+    Body: {"personas":true}
+    Estado: 400   Content-Type respuesta: application/json
+    Respuesta: {"error":"Revisá los campos de la actualización.","campos":["personas"]}
+
+[53] GET http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (GET de control después de: personas true)
+    Estado: 200   Content-Type respuesta: application/json
+    ¿Recurso intacto (igual al último estado válido)? sí
+
+[54] GET http://localhost:3000/api/reservas   (cantidad después de: personas true)
+    Estado: 200   Content-Type respuesta: application/json
+    Cantidad: 2
+
+[55] PATCH http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (personas arreglo [3])
+    Content-Type: application/json
+    Body: {"personas":[3]}
+    Estado: 400   Content-Type respuesta: application/json
+    Respuesta: {"error":"Revisá los campos de la actualización.","campos":["personas"]}
+
+[56] GET http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (GET de control después de: personas arreglo [3])
+    Estado: 200   Content-Type respuesta: application/json
+    ¿Recurso intacto (igual al último estado válido)? sí
+
+[57] GET http://localhost:3000/api/reservas   (cantidad después de: personas arreglo [3])
+    Estado: 200   Content-Type respuesta: application/json
+    Cantidad: 2
+
+[58] PATCH http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (personas objeto)
+    Content-Type: application/json
+    Body: {"personas":{"cantidad":3}}
+    Estado: 400   Content-Type respuesta: application/json
+    Respuesta: {"error":"Revisá los campos de la actualización.","campos":["personas"]}
+
+[59] GET http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (GET de control después de: personas objeto)
+    Estado: 200   Content-Type respuesta: application/json
+    ¿Recurso intacto (igual al último estado válido)? sí
+
+[60] GET http://localhost:3000/api/reservas   (cantidad después de: personas objeto)
+    Estado: 200   Content-Type respuesta: application/json
+    Cantidad: 2
+
+[61] PATCH http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (personas texto vacío "")
+    Content-Type: application/json
+    Body: {"personas":""}
+    Estado: 400   Content-Type respuesta: application/json
+    Respuesta: {"error":"Revisá los campos de la actualización.","campos":["personas"]}
+
+[62] GET http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (GET de control después de: personas texto vacío "")
+    Estado: 200   Content-Type respuesta: application/json
+    ¿Recurso intacto (igual al último estado válido)? sí
+
+[63] GET http://localhost:3000/api/reservas   (cantidad después de: personas texto vacío "")
+    Estado: 200   Content-Type respuesta: application/json
+    Cantidad: 2
+
+[64] PATCH http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (personas 1e999 (Infinity al leer el JSON))
+    Content-Type: application/json
+    Body: {"personas": 1e999}
+    Estado: 400   Content-Type respuesta: application/json
+    Respuesta: {"error":"Revisá los campos de la actualización.","campos":["personas"]}
+
+[65] GET http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (GET de control después de: personas 1e999 (Infinity al leer el JSON))
+    Estado: 200   Content-Type respuesta: application/json
+    ¿Recurso intacto (igual al último estado válido)? sí
+
+[66] GET http://localhost:3000/api/reservas   (cantidad después de: personas 1e999 (Infinity al leer el JSON))
+    Estado: 200   Content-Type respuesta: application/json
+    Cantidad: 2
+
+[67] PATCH http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (estado "cancelada")
+    Content-Type: application/json
+    Body: {"estado":"cancelada"}
+    Estado: 400   Content-Type respuesta: application/json
+    Respuesta: {"error":"Revisá los campos de la actualización.","campos":["estado"]}
+
+[68] GET http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (GET de control después de: estado "cancelada")
+    Estado: 200   Content-Type respuesta: application/json
+    ¿Recurso intacto (igual al último estado válido)? sí
+
+[69] GET http://localhost:3000/api/reservas   (cantidad después de: estado "cancelada")
+    Estado: 200   Content-Type respuesta: application/json
+    Cantidad: 2
+
+[70] PATCH http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (estado true (no es texto))
+    Content-Type: application/json
+    Body: {"estado":true}
+    Estado: 400   Content-Type respuesta: application/json
+    Respuesta: {"error":"Revisá los campos de la actualización.","campos":["estado"]}
+
+[71] GET http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (GET de control después de: estado true (no es texto))
+    Estado: 200   Content-Type respuesta: application/json
+    ¿Recurso intacto (igual al último estado válido)? sí
+
+[72] GET http://localhost:3000/api/reservas   (cantidad después de: estado true (no es texto))
+    Estado: 200   Content-Type respuesta: application/json
+    Cantidad: 2
+
+[73] PATCH http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (cuerpo arreglo)
+    Content-Type: application/json
+    Body: [{"personas":3}]
+    Estado: 400   Content-Type respuesta: application/json
+    Respuesta: {"error":"Revisá los campos de la actualización.","campos":[]}
+
+[74] GET http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (GET de control después de: cuerpo arreglo)
+    Estado: 200   Content-Type respuesta: application/json
+    ¿Recurso intacto (igual al último estado válido)? sí
+
+[75] GET http://localhost:3000/api/reservas   (cantidad después de: cuerpo arreglo)
+    Estado: 200   Content-Type respuesta: application/json
+    Cantidad: 2
+
+[76] PATCH http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (sin cuerpo (Body none))
+    Body: none
+    Estado: 400   Content-Type respuesta: application/json
+    Respuesta: {"error":"Revisá los campos de la actualización.","campos":[]}
+
+[77] GET http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (GET de control después de: sin cuerpo (Body none))
+    Estado: 200   Content-Type respuesta: application/json
+    ¿Recurso intacto (igual al último estado válido)? sí
+
+[78] GET http://localhost:3000/api/reservas   (cantidad después de: sin cuerpo (Body none))
+    Estado: 200   Content-Type respuesta: application/json
+    Cantidad: 2
+
+[79] PATCH http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (cuerpo text/plain)
+    Content-Type: text/plain
+    Body: personas=3
+    Estado: 400   Content-Type respuesta: application/json
+    Respuesta: {"error":"Revisá los campos de la actualización.","campos":[]}
+
+[80] GET http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (GET de control después de: cuerpo text/plain)
+    Estado: 200   Content-Type respuesta: application/json
+    ¿Recurso intacto (igual al último estado válido)? sí
+
+[81] GET http://localhost:3000/api/reservas   (cantidad después de: cuerpo text/plain)
+    Estado: 200   Content-Type respuesta: application/json
+    Cantidad: 2
+
+[82] PATCH http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (JSON mal formado)
+    Content-Type: application/json
+    Body: {"personas": }
+    Estado: 400   Content-Type respuesta: application/json
+    Respuesta: {"error":"Revisá los datos enviados.","campos":[]}
+
+[83] GET http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (GET de control después de: JSON mal formado)
+    Estado: 200   Content-Type respuesta: application/json
+    ¿Recurso intacto (igual al último estado válido)? sí
+
+[84] GET http://localhost:3000/api/reservas   (cantidad después de: JSON mal formado)
+    Estado: 200   Content-Type respuesta: application/json
+    Cantidad: 2
+
+==============================================================================
+F. Identificadores en PUT, PATCH, DELETE y GET
+==============================================================================
+
+[85] PATCH http://localhost:3000/api/reservas/abc   (ID mal formado (abc) con cuerpo válido)
+    Content-Type: application/json
+    Body: {"personas":3}
+    Estado: 400   Content-Type respuesta: application/json
+    Respuesta: {"error":"El identificador debe tener 24 caracteres hexadecimales.","campos":[]}
+
+[86] PUT http://localhost:3000/api/reservas/abc   (ID mal formado (abc) con cuerpo válido)
+    Content-Type: application/json
+    Body: {"estudiante":"Ana Ejemplo","email":"ana@example.com","sala":"Sala Norte","fecha":"2026-10-28","turno":"Mañana","personas":2,"estado":"confirmada"}
+    Estado: 400   Content-Type respuesta: application/json
+    Respuesta: {"error":"El identificador debe tener 24 caracteres hexadecimales.","campos":[]}
+
+[87] DELETE http://localhost:3000/api/reservas/abc   (ID mal formado (abc))
+    Body: none
+    Estado: 400   Content-Type respuesta: application/json
+    Respuesta: {"error":"El identificador debe tener 24 caracteres hexadecimales.","campos":[]}
+
+[88] GET http://localhost:3000/api/reservas/abc   (ID mal formado (abc))
+    Estado: 400   Content-Type respuesta: application/json
+    Respuesta: {"error":"El identificador debe tener 24 caracteres hexadecimales.","campos":[]}
+
+[89] GET http://localhost:3000/api/reservas   (cantidad antes de escribir sobre un ID ausente)
+    Estado: 200   Content-Type respuesta: application/json
+    Cantidad: 2
+
+[90] PUT http://localhost:3000/api/reservas/000000000000000000000000   (ID válido ausente, cuerpo válido)
+    Content-Type: application/json
+    Body: {"estudiante":"Ana Ejemplo","email":"ana@example.com","sala":"Sala Norte","fecha":"2026-10-28","turno":"Mañana","personas":2,"estado":"confirmada"}
+    Estado: 404   Content-Type respuesta: application/json
+    Respuesta: {"error":"Reserva no encontrada."}
+
+[91] PATCH http://localhost:3000/api/reservas/000000000000000000000000   (ID válido ausente, cuerpo válido)
+    Content-Type: application/json
+    Body: {"personas":3}
+    Estado: 404   Content-Type respuesta: application/json
+    Respuesta: {"error":"Reserva no encontrada."}
+
+[92] DELETE http://localhost:3000/api/reservas/000000000000000000000000   (ID válido ausente)
+    Body: none
+    Estado: 404   Content-Type respuesta: application/json
+    Respuesta: {"error":"Reserva no encontrada."}
+
+[93] GET http://localhost:3000/api/reservas/000000000000000000000000   (ID válido ausente)
+    Estado: 404   Content-Type respuesta: application/json
+    Respuesta: {"error":"Reserva no encontrada."}
+
+[94] GET http://localhost:3000/api/reservas   (cantidad después: upsert false, no se creó nada)
+    Estado: 200   Content-Type respuesta: application/json
+    Cantidad: 2
+
+==============================================================================
+G. DELETE: eliminación física de una reserva de ejercicio (Carla)
+==============================================================================
+
+[95] GET http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1d   (verificar el objetivo antes de borrar)
+    Estado: 200   Content-Type respuesta: application/json
+    Respuesta: {"id":"6ae3d0342e7f273418e9de1d","estudiante":"Carla Ejemplo","email":"carla@example.com","sala":"Sala Sur","fecha":"2026-10-29","turno":"Tarde","personas":3,"estado":"pendiente"}
+
+[96] GET http://localhost:3000/api/reservas   (cantidad antes del DELETE)
+    Estado: 200   Content-Type respuesta: application/json
+    Cantidad: 2
+
+[97] DELETE http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1d   (eliminar la reserva elegida)
+    Body: none
+    Estado: 204   Content-Type respuesta: (ninguno)
+    Respuesta: (cuerpo vacío, 0 bytes)
+
+[98] GET http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1d   (GET posterior al DELETE)
+    Estado: 404   Content-Type respuesta: application/json
+    Respuesta: {"error":"Reserva no encontrada."}
+
+[99] DELETE http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1d   (repetir el DELETE)
+    Body: none
+    Estado: 404   Content-Type respuesta: application/json
+    Respuesta: {"error":"Reserva no encontrada."}
+
+[100] PATCH http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1d   (PATCH al ID recién eliminado)
+    Content-Type: application/json
+    Body: {"personas":2}
+    Estado: 404   Content-Type respuesta: application/json
+    Respuesta: {"error":"Reserva no encontrada."}
+
+[101] GET http://localhost:3000/api/reservas   (cantidad después del DELETE)
+    Estado: 200   Content-Type respuesta: application/json
+    Cantidad: 1
+
+[102] GET http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (la otra reserva (Ana) se conserva)
+    Estado: 200   Content-Type respuesta: application/json
+    ¿Recurso intacto (igual al último estado válido)? sí
+
+==============================================================================
+H. Listado, filtro y rutas de la API
+==============================================================================
+
+[103] GET http://localhost:3000/api/reservas   (listado: sigue siendo un arreglo)
+    Estado: 200   Content-Type respuesta: application/json
+    Respuesta: [{"id":"6ae3d0342e7f273418e9de1c","estudiante":"Ana Ejemplo","email":"ana@example.com","sala":"Sala Norte","fecha":"2026-10-28","turno":"Mañana","personas":4,"estado":"confirmada"}]
+    ¿Es un arreglo, sin metadatos? sí
+
+[104] GET http://localhost:3000/api/reservas?sala=Sala%20Norte   (filtro exacto sala=Sala Norte)
+    Estado: 200   Content-Type respuesta: application/json
+    Respuesta: [{"id":"6ae3d0342e7f273418e9de1c","estudiante":"Ana Ejemplo","email":"ana@example.com","sala":"Sala Norte","fecha":"2026-10-28","turno":"Mañana","personas":4,"estado":"confirmada"}]
+
+[105] GET http://localhost:3000/api/no-existe   (ruta API inexistente)
+    Estado: 404   Content-Type respuesta: application/json
+    Respuesta: {"error":"Ruta no encontrada."}
+
+[106] POST http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (método no definido (POST sobre un ID))
+    Content-Type: application/json
+    Body: {"personas":3}
+    Estado: 404   Content-Type respuesta: application/json
+    Respuesta: {"error":"Ruta no encontrada."}
+
+==============================================================================
+I. Sitio HTML y /estado: contratos conservados
+==============================================================================
+
+[107] GET http://localhost:3000/   (inicio)
+    Estado: 200   Content-Type respuesta: text/html
+    Respuesta: HTML con título "Gestión de Salas de Estudio"
+
+[108] GET http://localhost:3000/css/estilos.css   (CSS)
+    Estado: 200   Content-Type respuesta: text/css
+
+[109] GET http://localhost:3000/no-existe   (ruta inexistente)
+    Estado: 404   Content-Type respuesta: text/html
+    Respuesta: HTML con título "Página no encontrada"
+
+[110] GET http://localhost:3000/reservas   (listado HTML)
+    Estado: 200   Content-Type respuesta: text/html
+    Respuesta: HTML con título "Listado de reservas"
+    ¿Muestra a Ana Ejemplo? sí   ¿Muestra a Carla Ejemplo (eliminada)? no
+
+[111] GET http://localhost:3000/reservas/6ae3d0342e7f273418e9de1c   (detalle HTML de la reserva modificada por la API)
+    Estado: 200   Content-Type respuesta: text/html
+    Respuesta: HTML con título "Reserva de Ana Ejemplo"
+    ¿Muestra estado confirmada y 4 personas? sí
+
+[112] GET http://localhost:3000/reservas/6ae3d0342e7f273418e9de1d   (detalle HTML de la reserva eliminada)
+    Estado: 404   Content-Type respuesta: text/html
+    Respuesta: HTML con título "Reserva no encontrada"
+
+[113] GET http://localhost:3000/api/reservas   (cantidad antes del formulario)
+    Estado: 200   Content-Type respuesta: application/json
+    Cantidad: 1
+
+[114] POST http://localhost:3000/reservas   (formulario válido)
+    Content-Type: application/x-www-form-urlencoded
+    Body: estudiante=Bruno+Ejemplo&email=bruno%40example.com&sala=Sala+Multimedia&fecha=2026-10-30&turno=Noche&personas=4
+    Estado: 302   Content-Type respuesta: text/plain
+    Location: /reservas
+    Respuesta: HTML
+
+[115] GET http://localhost:3000/api/reservas   (cantidad después del formulario válido)
+    Estado: 200   Content-Type respuesta: application/json
+    Cantidad: 2
+
+[116] GET http://localhost:3000/reservas   (¿aparece en el HTML?)
+    Estado: 200   Content-Type respuesta: text/html
+    ¿El listado HTML muestra "Bruno Ejemplo"? sí
+
+[117] POST http://localhost:3000/reservas   (formulario inválido (9 personas))
+    Content-Type: application/x-www-form-urlencoded
+    Body: estudiante=Valor+Conservado&email=bruno%40example.com&sala=Sala+Multimedia&fecha=2026-10-30&turno=Noche&personas=9
+    Estado: 400   Content-Type respuesta: text/html
+    Respuesta: HTML con título "Registrar nueva reserva"
+    ¿Conserva el valor "Valor Conservado"? sí
+
+[118] GET http://localhost:3000/api/reservas   (cantidad después del formulario inválido)
+    Estado: 200   Content-Type respuesta: application/json
+    Cantidad: 2
+
+[119] GET http://localhost:3000/estado   (estado)
+    Estado: 200   Content-Type respuesta: application/json
+    Respuesta: {"servicio":"activo","reservas":2,"solicitudId":"BIB-0119"}
+    ¿/estado coincide con la cantidad de la API? sí
+
+[120] GET http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (estado de Ana antes de reiniciar)
+    Estado: 200   Content-Type respuesta: application/json
+    Respuesta: {"id":"6ae3d0342e7f273418e9de1c","estudiante":"Ana Ejemplo","email":"ana@example.com","sala":"Sala Norte","fecha":"2026-10-28","turno":"Mañana","personas":4,"estado":"confirmada"}
+
+==============================================================================
+J. Cierre ordenado (Ctrl+C) y reinicio con la misma base
+==============================================================================
+    consola> Cerrando el servidor...
+    consola> Conexión con MongoDB cerrada.
+    Código de salida: 0
+    consola> Aplicación disponible en http://localhost:3000
+
+[121] GET http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1c   (reserva actualizada, mismo ID, sin repetir escrituras)
+    Estado: 200   Content-Type respuesta: application/json
+    Respuesta: {"id":"6ae3d0342e7f273418e9de1c","estudiante":"Ana Ejemplo","email":"ana@example.com","sala":"Sala Norte","fecha":"2026-10-28","turno":"Mañana","personas":4,"estado":"confirmada"}
+    ¿Conserva el estado posterior a PUT y PATCH? sí
+
+[122] GET http://localhost:3000/api/reservas/6ae3d0342e7f273418e9de1d   (reserva eliminada: sigue ausente)
+    Estado: 404   Content-Type respuesta: application/json
+    Respuesta: {"error":"Reserva no encontrada."}
+
+[123] GET http://localhost:3000/reservas/6ae3d0342e7f273418e9de1c   (detalle en el sitio después de reiniciar)
+    Estado: 200   Content-Type respuesta: text/html
+    Respuesta: HTML con título "Reserva de Ana Ejemplo"
+
+[124] GET http://localhost:3000/api/reservas   (primera, tras reiniciar)
+    Estado: 200   Content-Type respuesta: application/json
+    Cantidad: 2
+
+[125] GET http://localhost:3000/api/reservas   (segunda, tras reiniciar)
+    Estado: 200   Content-Type respuesta: application/json
+    Cantidad: 2
+
+[126] GET http://localhost:3000/estado   (estado tras reiniciar)
+    Estado: 200   Content-Type respuesta: application/json
+    Respuesta: {"servicio":"activo","reservas":2,"solicitudId":"BIB-0006"}
+
+==============================================================================
+K. Arranque sin MONGODB_URI (npm start, sin --env-file)
+==============================================================================
+    Nota: durante esta sesión había otro proyecto Node (ajeno al TP) escuchando en
+    0.0.0.0:3000. Express escucha en :: (IPv6), por eso la comprobación correcta
+    del TP es sobre ::1. Esta sección se repitió por separado con las dos direcciones.
+    consola> No se pudo iniciar la aplicación: ErrorDeConfiguracion
+    consola> Falta MONGODB_URI en el entorno.
+    consola> Revisar entorno, DNS, red, acceso de Atlas y puerto.
+    Código de salida: 1
+    ¿Apareció "Aplicación disponible"? no
+    Puerto 3000 en ::1 (IPv6, donde escucha Express en esta máquina): cerrado
+    Puerto 3000 en 127.0.0.1 (IPv4): abierto  <- ocupado por otro proyecto ajeno al TP (Dulces Caprichos), que ya estaba corriendo antes de las pruebas
+
+==============================================================================
+L. Consulta directa a la colección (equivalente a Data Explorer) y segundo nivel de validación
+==============================================================================
+
+    Base: reservas_salas_u9   Colección: reservas   Documentos: 2
+    findOne({ _id: ObjectId("6ae3d0342e7f273418e9de1c") }):
+    {"_id":"6ae3d0342e7f273418e9de1c","estudiante":"Ana Ejemplo","email":"ana@example.com","sala":"Sala Norte","fecha":"2026-10-28","turno":"Mañana","personas":4,"estado":"confirmada"}
+    Tipo de _id guardado: ObjectId
+    findOne({ _id: ObjectId("6ae3d0342e7f273418e9de1d") }) (eliminada): null
+
+    Servicio llamado directamente (sin el middleware HTTP), sobre una reserva temporal:
+    - actualizar personas 9 (sin middleware): rechazado: ValidationError / campos personas
+    - actualizar personas 2.5 (sin middleware): rechazado: ValidationError / campos personas
+    - actualizar estado "cancelada" (sin middleware): rechazado: ValidationError / campos estado
+    - actualizar sin campos permitidos (sin middleware): rechazado: Error / codigo ENTRADA_INVALIDA
+    - reemplazar con sala "Sala Este" (sin middleware): rechazado: ValidationError / campos sala
+    - actualizar personas "abc" (sin middleware): rechazado: CastError
+    La reserva temporal sigue igual (personas 2, estado pendiente). Se elimina con el servicio: true
+    reemplazar sobre un ID ausente devuelve: null (upsert: false, no inserta)
+    Documentos al terminar: 2
+
+==============================================================================
+M. Fallo inesperado simulado (node scripts/simular-fallo-servicio.js, sin conectar a Atlas)
+==============================================================================
+
+    GET /api/reservas -> 500 application/json; charset=utf-8 | detalles internos: no
+    GET /api/reservas/000000000000000000000000 -> 500 application/json; charset=utf-8 | detalles internos: no
+    POST /api/reservas -> 500 application/json; charset=utf-8 | detalles internos: no
+    PUT /api/reservas/000000000000000000000000 -> 500 application/json; charset=utf-8 | detalles internos: no
+    PATCH /api/reservas/000000000000000000000000 -> 500 application/json; charset=utf-8 | detalles internos: no
+    DELETE /api/reservas/000000000000000000000000 -> 500 application/json; charset=utf-8 | detalles internos: no
+    GET /estado -> 500 application/json; charset=utf-8 | detalles internos: no
+    GET /reservas -> 500 text/html; charset=utf-8 | detalles internos: no

@@ -1,0 +1,49 @@
+<section class="panel-formulario">
+    <p class="etiqueta">
+        <%= seccion %>
+    </p>
+    <h1>
+        <%= titulo %>
+    </h1>
+
+    <% if (error) { %>
+        <p class="error" role="alert">
+            <%= error %>
+        </p>
+        <% } %>
+
+            <form action="/reservas" method="post" class="formulario">
+                <label for="estudiante">Nombre del estudiante</label>
+                <input id="estudiante" name="estudiante" value="<%= valores.estudiante ?? '' %>" required>
+
+                <label for="email">Correo electrónico</label>
+                <input id="email" name="email" type="email" value="<%= valores.email ?? '' %>" required>
+
+                <label for="sala">Sala de estudio</label>
+                <select id="sala" name="sala" required>
+                    <option value="">Seleccione una sala</option>
+                    <% salasPermitidas.forEach((s)=> { %>
+                        <option value="<%= s %>" <%=valores.sala===s ? 'selected' : '' %>><%= s %>
+                        </option>
+                        <% }) %>
+                </select>
+
+                <label for="fecha">Fecha</label>
+                <input id="fecha" name="fecha" type="date" value="<%= valores.fecha ?? '' %>" required>
+
+                <label for="turno">Turno</label>
+                <select id="turno" name="turno" required>
+                    <option value="">Seleccione un turno</option>
+                    <% turnosPermitidos.forEach((t)=> { %>
+                        <option value="<%= t %>" <%=valores.turno===t ? 'selected' : '' %>><%= t %>
+                        </option>
+                        <% }) %>
+                </select>
+
+                <label for="personas">Cantidad de personas (1 a 6)</label>
+                <input id="personas" name="personas" type="number" min="1" max="6" value="<%= valores.personas ?? '' %>"
+                    required>
+
+                <button type="submit">Confirmar Reserva</button>
+            </form>
+</section>
