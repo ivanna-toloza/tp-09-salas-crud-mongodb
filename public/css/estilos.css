@@ -1,142 +1,274 @@
+/* ========================================================================== */
+/* ARCHIVO: public/css/estilos.css · HOJA DE ESTILOS DEL SITIO */
+/* -------------------------------------------------------------------------- */
+/* Se sirve como archivo estático (express.static) y la carga el layout con */
+/* la etiqueta link. Solo define la presentación: no tiene lógica. */
+/* */
+/* TEORÍA */
+/* - Regla CSS: selector { propiedad: valor; }. El selector elige elementos */
+/*   (.clase, etiqueta, :pseudoclase) y las propiedades definen su aspecto. */
+/* - Varios selectores separados por comas comparten la misma regla. */
+/* - rem: unidad relativa al tamaño de letra raíz (normalmente 1rem = 16px). */
+/* - Flexbox (display: flex) ordena elementos en fila o en columna; Grid */
+/*   (display: grid) los ordena en una cuadrícula. */
+/* - Colores en hexadecimal: #RRGGBB (cantidad de rojo, verde y azul). */
+/* ========================================================================== */
+/* :root es el elemento raíz (html): lo que se define acá se hereda en toda la página. */
 :root {
+    /* Tipografía del sistema operativo; si no existe, la siguiente; al final, una sin serifa. */
     font-family: system-ui, -apple-system, sans-serif;
+    /* Color del texto: gris azulado muy oscuro. */
     color: #1e293b;
+    /* Color de fondo: gris casi blanco. */
     background: #f8fafc;
+    /* Interlineado: 1,5 veces el tamaño de la letra (mejora la lectura). */
     line-height: 1.5;
+    /* Cierra la regla. */
 }
 
+/* Selector universal (*) y los pseudoelementos ::before y ::after (tres líneas */
+/* separadas por comas, misma regla): se aplica a TODOS los elementos. */
 *,
 *::before,
 *::after {
+    /* El ancho incluye el relleno y el borde: las medidas son más predecibles. */
     box-sizing: border-box;
+    /* Cierra la regla. */
 }
 
+/* Cuerpo de la página. */
 body {
+    /* Alto mínimo: toda la ventana (100vh = 100 % del alto visible). */
     min-height: 100vh;
+    /* Quita el margen que el navegador pone por defecto. */
     margin: 0;
+    /* Flexbox: ordena encabezado, contenido y pie... */
     display: flex;
+    /* ...en columna (uno debajo del otro). */
     flex-direction: column;
+    /* Cierra la regla. */
 }
 
+/* Encabezado, pie y contenedor principal (tres selectores, misma regla). */
 .encabezado,
 .pie,
 .contenedor {
+    /* Ancho: el menor entre 72rem y el ancho de pantalla menos 2rem (margen en celulares). */
     width: min(72rem, calc(100% - 2rem));
+    /* Márgenes laterales automáticos: centra el bloque. */
     margin-inline: auto;
+    /* Cierra la regla. */
 }
 
+/* Encabezado de la página. */
 .encabezado {
+    /* Flexbox: marca y menú en una fila. */
     display: flex;
+    /* Centrados verticalmente. */
     align-items: center;
+    /* Marca a la izquierda y menú a la derecha, con el espacio en el medio. */
     justify-content: space-between;
+    /* Relleno arriba y abajo. */
     padding-block: 1rem;
+    /* Línea inferior gris clara. */
     border-bottom: 1px solid #cbd5e1;
+    /* Cierra la regla. */
 }
 
+/* El menú (nav) que está dentro del encabezado. */
 .encabezado nav {
+    /* Enlaces en fila... */
     display: flex;
+    /* ...separados por 1rem. */
     gap: 1rem;
+    /* Cierra la regla. */
 }
 
+/* Enlace de la marca (ícono + nombre del sitio). */
 .marca {
+    /* Ícono y texto en fila. */
     display: flex;
+    /* Centrados verticalmente. */
     align-items: center;
+    /* Espacio entre el ícono y el texto. */
     gap: 0.5rem;
+    /* Sin subrayado. */
     text-decoration: none;
+    /* Negrita. */
     font-weight: 700;
+    /* Mismo color que el texto que lo rodea (no el azul de los enlaces). */
     color: inherit;
+    /* Cierra la regla. */
 }
 
+/* Contenedor principal (main). */
 .contenedor {
+    /* Ocupa todo el alto sobrante: empuja el pie hacia abajo. */
     flex: 1;
+    /* Relleno arriba y abajo. */
     padding-block: 2rem;
+    /* Cierra la regla. */
 }
 
+/* Paneles centrales: portada, formulario, detalle y página de error. */
 .hero,
 .panel-formulario,
 .detalle,
 .estado {
+    /* Ancho máximo, para que no se estiren en pantallas grandes. */
     max-width: 40rem;
+    /* Centrados horizontalmente. */
     margin-inline: auto;
+    /* Fondo blanco. */
     background: white;
+    /* Relleno interno. */
     padding: 2rem;
+    /* Esquinas redondeadas. */
     border-radius: 0.5rem;
+    /* Borde gris muy claro. */
     border: 1px solid #e2e8f0;
+    /* Cierra la regla. */
 }
 
+/* Etiquetas pequeñas (sección, sala, código de error). */
 .etiqueta {
+    /* Letra chica. */
     font-size: 0.75rem;
+    /* Muy gruesa. */
     font-weight: 800;
+    /* Azul. */
     color: #2563eb;
+    /* Todo en mayúsculas. */
     text-transform: uppercase;
+    /* Cierra la regla. */
 }
 
+/* Botones (enlaces o button con la clase boton). */
 .boton {
+    /* En línea con el texto, pero acepta relleno y ancho. */
     display: inline-block;
+    /* Relleno: 0.5rem arriba y abajo, 1rem a los lados. */
     padding: 0.5rem 1rem;
+    /* Fondo azul. */
     background: #2563eb;
+    /* Texto blanco. */
     color: white;
+    /* Sin subrayado. */
     text-decoration: none;
+    /* Esquinas redondeadas. */
     border-radius: 0.375rem;
+    /* Seminegrita. */
     font-weight: 600;
+    /* Sin borde. */
     border: none;
+    /* Cursor de mano al pasar por encima. */
     cursor: pointer;
+    /* Cierra la regla. */
 }
 
+/* Botón que además tiene la clase secundario (las dos clases a la vez, sin espacio). */
 .boton.secundario {
+    /* Fondo gris en lugar de azul. */
     background: #64748b;
+    /* Cierra la regla. */
 }
 
+/* Cabecera del listado (título y botón Nueva Reserva). */
 .cabecera-pagina {
+    /* En fila. */
     display: flex;
+    /* Título a la izquierda y botón a la derecha. */
     justify-content: space-between;
+    /* Centrados verticalmente. */
     align-items: center;
+    /* Espacio debajo, antes de las tarjetas. */
     margin-bottom: 1.5rem;
+    /* Cierra la regla. */
 }
 
+/* Grilla de tarjetas del listado. */
 .grilla {
+    /* CSS Grid: cuadrícula. */
     display: grid;
+    /* Tantas columnas como entren (auto-fill), cada una de 15rem como mínimo y */
+    /* repartiendo el espacio sobrante (1fr). Se adapta sola al ancho de pantalla. */
     grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+    /* Separación entre tarjetas. */
     gap: 1rem;
+    /* Cierra la regla. */
 }
 
+/* Cada tarjeta de reserva. */
 .tarjeta {
+    /* Fondo blanco. */
     background: white;
+    /* Relleno interno. */
     padding: 1rem;
+    /* Esquinas redondeadas. */
     border-radius: 0.5rem;
+    /* Borde gris muy claro. */
     border: 1px solid #e2e8f0;
+    /* Cierra la regla. */
 }
 
+/* El formulario de nueva reserva. */
 .formulario {
+    /* Flexbox... */
     display: flex;
+    /* ...en columna: cada rótulo y cada campo debajo del anterior. */
     flex-direction: column;
+    /* Separación entre elementos. */
     gap: 0.75rem;
+    /* Cierra la regla. */
 }
 
+/* Campos de texto y listas desplegables del formulario (dos selectores). */
 .formulario input,
 .formulario select {
+    /* Relleno interno. */
     padding: 0.5rem;
+    /* Borde gris claro. */
     border: 1px solid #cbd5e1;
+    /* Esquinas apenas redondeadas. */
     border-radius: 0.25rem;
+    /* Misma tipografía que la página (los campos no la heredan solos). */
     font: inherit;
+    /* Cierra la regla. */
 }
 
+/* :focus-visible: elemento enfocado con el teclado (tecla Tab). Accesibilidad. */
 :focus-visible {
+    /* Contorno azul de 2px para ver dónde está el foco. */
     outline: 2px solid #2563eb;
+    /* Separado 2px del elemento. */
     outline-offset: 2px;
+    /* Cierra la regla. */
 }
 
+/* Mensaje de error del formulario. */
 .error {
+    /* Fondo rojo muy claro. */
     background: #fef2f2;
+    /* Texto rojo oscuro. */
     color: #991b1b;
+    /* Relleno interno. */
     padding: 0.75rem;
+    /* Franja roja a la izquierda. */
     border-left: 4px solid #ef4444;
+    /* Seminegrita. */
     font-weight: 600;
+    /* Cierra la regla. */
 }
 
+/* Pie de página. */
 .pie {
+    /* Relleno arriba y abajo. */
     padding-block: 1rem;
+    /* Línea superior gris clara. */
     border-top: 1px solid #cbd5e1;
+    /* Texto centrado. */
     text-align: center;
+    /* Texto gris. */
     color: #64748b;
+    /* Cierra la regla. */
 }

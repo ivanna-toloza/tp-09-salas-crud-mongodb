@@ -1,12 +1,31 @@
+<%# ========================================================================= -%>
+<%# ARCHIVO: views/partials/encabezado.ejs · PARCIAL DEL ENCABEZADO -%>
+<%# ------------------------------------------------------------------------- -%>
+<%# Parcial = fragmento de HTML reutilizable. El layout lo inserta con include -%>
+<%# en todas las páginas, así el menú se escribe una sola vez. -%>
+<%# ========================================================================= -%>
+<%# Abre el encabezado de la página. -%>
 <header class="encabezado">
+    <%# Enlace con la marca del sitio que lleva al inicio. -%>
     <a class="marca" href="/">
+        <%# Ícono de la sala. alt="" indica que es decorativo (los lectores de -%>
+        <%# pantalla lo saltean); width y height reservan su lugar al cargar. -%>
         <img src="/img/sala.svg" alt="" width="40" height="40">
+        <%# Nombre del sitio. -%>
         <span>Salas de Estudio</span>
+    <%# Cierra el enlace de la marca. -%>
     </a>
+    <%# Menú de navegación. aria-label le da un nombre para los lectores de pantalla. -%>
     <nav aria-label="Navegación principal">
+        <%# Enlace al inicio (GET /). -%>
         <a href="/">Inicio</a>
+        <%# Enlace al listado (GET /reservas). -%>
         <a href="/reservas">Reservas</a>
+        <%# Enlace al formulario (GET /reservas/nueva). -%>
         <a href="/reservas/nueva">Nueva Reserva</a>
+        <%# Enlace al JSON de estado (GET /estado). -%>
         <a href="/estado">Estado API</a>
+    <%# Cierra el menú. -%>
     </nav>
+<%# Cierra el encabezado. -%>
 </header>

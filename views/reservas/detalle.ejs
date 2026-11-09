@@ -1,37 +1,79 @@
+<%# ========================================================================= -%>
+<%# ARCHIVO: views/reservas/detalle.ejs · DETALLE DE UNA RESERVA -%>
+<%# ------------------------------------------------------------------------- -%>
+<%# La renderiza el controlador mostrarDetalle (GET /reservas/:id) con titulo -%>
+<%# y el objeto reserva. Como lee siempre de la base, después de un PUT o un -%>
+<%# PATCH muestra los valores ACTUALIZADOS. -%>
+<%# ========================================================================= -%>
+<%# Abre el artículo del detalle. -%>
 <article class="detalle">
+    <%# Abre la etiqueta superior. -%>
     <p class="etiqueta">
+        <%# Imprime la sección (de res.locals) y la sala de la reserva. -%>
         <%= seccion %> | <%= reserva.sala %>
+    <%# Cierra la etiqueta. -%>
     </p>
+    <%# Abre el título. -%>
     <h1>
+        <%# Imprime el titulo que arma el controlador: "Reserva de <nombre>". -%>
         <%= titulo %>
+    <%# Cierra el título. -%>
     </h1>
 
+    <%# Lista con los datos de la reserva. -%>
     <ul class="datos-detalle">
+        <%# Abre el ítem del identificador con su rótulo en negrita. -%>
         <li><strong>Identificador:</strong>
+            <%# Imprime el id dentro de code, para que se vea con letra de código. -%>
             <code><%= reserva.id %></code>
+        <%# Cierra el ítem. -%>
         </li>
+        <%# Abre el ítem del estudiante. -%>
         <li><strong>Estudiante:</strong>
+            <%# Imprime el nombre. -%>
             <%= reserva.estudiante %>
+        <%# Cierra el ítem. -%>
         </li>
+        <%# Abre el ítem del email. -%>
         <li><strong>Email de contacto:</strong>
+            <%# Imprime el email. -%>
             <%= reserva.email %>
+        <%# Cierra el ítem. -%>
         </li>
+        <%# Abre el ítem de la sala. -%>
         <li><strong>Sala asignada:</strong>
+            <%# Imprime la sala. -%>
             <%= reserva.sala %>
+        <%# Cierra el ítem. -%>
         </li>
+        <%# Abre el ítem de la fecha. -%>
         <li><strong>Fecha:</strong>
+            <%# Imprime la fecha. -%>
             <%= reserva.fecha %>
+        <%# Cierra el ítem. -%>
         </li>
+        <%# Abre el ítem del turno. -%>
         <li><strong>Turno:</strong>
+            <%# Imprime el turno. -%>
             <%= reserva.turno %>
+        <%# Cierra el ítem. -%>
         </li>
+        <%# Abre el ítem de personas. -%>
         <li><strong>Cantidad de personas:</strong>
+            <%# Imprime la cantidad (refleja el último PUT o PATCH). -%>
             <%= reserva.personas %>
+        <%# Cierra el ítem. -%>
         </li>
+        <%# Abre el ítem del estado. -%>
         <li><strong>Estado:</strong>
+            <%# Imprime el estado: pendiente o confirmada. -%>
             <%= reserva.estado %>
+        <%# Cierra el ítem. -%>
         </li>
+    <%# Cierra la lista. -%>
     </ul>
 
+    <%# Botón para volver al listado. -%>
     <a class="boton" href="/reservas">Volver a las reservas</a>
+<%# Cierra el artículo. -%>
 </article>

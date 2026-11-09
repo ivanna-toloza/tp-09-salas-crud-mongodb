@@ -1,11 +1,28 @@
+<%# ========================================================================= -%>
+<%# ARCHIVO: views/inicio.ejs · PÁGINA DE INICIO -%>
+<%# ------------------------------------------------------------------------- -%>
+<%# La renderiza la ruta GET / de app.js con la variable titulo. El layout la -%>
+<%# envuelve con el encabezado y el pie. -%>
+<%# ========================================================================= -%>
+<%# Sección de presentación de la portada (clase hero del CSS). -%>
 <section class="hero">
+    <%# Etiqueta pequeña sobre el título. -%>
     <p class="etiqueta">SISTEMA DE RESERVAS</p>
+    <%# Abre el título principal. -%>
     <h1>
+        <%# Imprime con escape el titulo que envía app.js. -%>
         <%= titulo %>
+    <%# Cierra el título. -%>
     </h1>
+    <%# Descripción del sistema. -%>
     <p>Gestión eficiente de espacios de trabajo y salas de estudio grupal.</p>
+    <%# Contenedor de los botones. -%>
     <div class="acciones">
+        <%# Botón que lleva al listado (GET /reservas). -%>
         <a class="boton" href="/reservas">Ver reservas activas</a>
+        <%# Botón que lleva al formulario, con estilo secundario (gris). -%>
         <a class="boton secundario" href="/reservas/nueva">Reservar una sala</a>
+    <%# Cierra el contenedor de botones. -%>
     </div>
+<%# Cierra la sección. -%>
 </section>

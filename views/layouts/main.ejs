@@ -1,19 +1,58 @@
+<%# ========================================================================= -%>
+<%# ARCHIVO: views/layouts/main.ejs · LAYOUT (DISEÑO COMÚN DE TODAS LAS PÁGINAS) -%>
+<%# ------------------------------------------------------------------------- -%>
+<%# Lo usa express-ejs-layouts: cada vista se renderiza y su HTML se inserta -%>
+<%# acá, en la variable body. Así encabezado, pie, estilos y scripts se -%>
+<%# escriben una sola vez. -%>
+<%# -%>
+<%# TEORÍA: tipos de etiquetas EJS -%>
+<%# - Con signo igual: imprime el valor ESCAPADO (convierte los signos menor, -%>
+<%#   mayor y ampersand en texto seguro). Evita que alguien inyecte HTML o -%>
+<%#   JavaScript escribiéndolo, por ejemplo, como nombre (ataque XSS). -%>
+<%# - Con guion: imprime SIN escapar. Solo se usa con HTML que genera la -%>
+<%#   propia app (los include de parciales y el body). -%>
+<%# - Sin símbolo: ejecuta JavaScript sin imprimir nada (if, forEach). -%>
+<%# - Con numeral (como estos comentarios): no se ejecuta ni llega al -%>
+<%#   navegador. El guion del final evita que deje una línea en blanco. -%>
+<%# ========================================================================= -%>
+<%# Declara que el documento es HTML5. -%>
 <!doctype html>
+<%# Abre el HTML. lang="es" indica el idioma (lo usan el navegador y los lectores de pantalla). -%>
 <html lang="es">
+<%# Abre la cabecera: datos de la página que no se ven en el contenido. -%>
 <head>
+    <%# Codificación UTF-8: para que se vean bien las tildes y la ñ. -%>
     <meta charset="utf-8">
+    <%# Adapta el ancho de la página al de la pantalla (celulares). -%>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <%# Abre el título de la pestaña del navegador. -%>
     <title>
+        <%# Imprime con escape el titulo que manda cada controlador en res.render, -%>
+        <%# seguido del texto fijo "| Salas de Estudio". -%>
         <%= titulo %> | Salas de Estudio
+    <%# Cierra el título. -%>
     </title>
+    <%# Carga la hoja de estilos. La entrega express.static desde public/css/estilos.css. -%>
     <link rel="stylesheet" href="/css/estilos.css">
+    <%# Carga el JavaScript del navegador. defer: se ejecuta cuando terminó de leerse el HTML. -%>
     <script src="/js/app.js" defer></script>
+<%# Cierra la cabecera. -%>
 </head>
+<%# Abre el cuerpo: lo que se ve en la página. -%>
 <body>
+    <%# Inserta el parcial del encabezado (ruta relativa a este layout). Usa la -%>
+    <%# etiqueta con guion (sin escapar) porque es HTML propio de la app. -%>
     <%- include("../partials/encabezado") %>
+        <%# Abre el contenido principal de la página. -%>
         <main class="contenedor">
+            <%# body es el HTML de la vista que se renderizó (inicio, lista, -%>
+            <%# detalle...). Lo inserta express-ejs-layouts, sin escapar. -%>
             <%- body %>
+        <%# Cierra el contenido principal. -%>
         </main>
+        <%# Inserta el parcial del pie de página. -%>
         <%- include("../partials/pie") %>
+<%# Cierra el cuerpo. -%>
 </body>
+<%# Cierra el documento HTML. -%>
 </html>

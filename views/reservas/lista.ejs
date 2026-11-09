@@ -1,35 +1,77 @@
+<%# ========================================================================= -%>
+<%# ARCHIVO: views/reservas/lista.ejs · LISTADO DE RESERVAS -%>
+<%# ------------------------------------------------------------------------- -%>
+<%# La renderiza el controlador listar (GET /reservas) con titulo y el arreglo -%>
+<%# reservas. seccion llega por res.locals (prepararAreaReservas). -%>
+<%# Si no hay reservas muestra un aviso; si hay, una tarjeta por cada una. -%>
+<%# ========================================================================= -%>
+<%# Cabecera de la página del listado. -%>
 <header class="cabecera-pagina">
+    <%# Agrupa la etiqueta y el título. -%>
     <div>
+        <%# Abre la etiqueta de la sección. -%>
         <p class="etiqueta">
+            <%# Imprime seccion ("Reservas de salas"), que viene de res.locals. -%>
             <%= seccion %>
+        <%# Cierra la etiqueta. -%>
         </p>
+        <%# Abre el título. -%>
         <h1>
+            <%# Imprime el titulo que envía el controlador listar. -%>
             <%= titulo %>
+        <%# Cierra el título. -%>
         </h1>
+    <%# Cierra el grupo. -%>
     </div>
+    <%# Botón para crear una reserva. -%>
     <a class="boton" href="/reservas/nueva">Nueva Reserva</a>
+<%# Cierra la cabecera. -%>
 </header>
 
+<%# JavaScript sin imprimir: si el arreglo de reservas está vacío... -%>
 <% if (reservas.length===0) { %>
+    <%# ...muestra un mensaje de lista vacía. -%>
     <p class="estado-vacio">No hay reservas registradas en este momento.</p>
+    <%# Si no está vacío (else)... -%>
     <% } else { %>
+        <%# ...abre la grilla de tarjetas. aria-label la nombra para lectores de pantalla. -%>
         <section class="grilla" aria-label="Lista de reservas">
+            <%# forEach recorre las reservas: el HTML hasta el cierre del forEach -%>
+            <%# se repite UNA VEZ POR RESERVA, con la variable reserva. -%>
             <% reservas.forEach((reserva)=> { %>
+                <%# Abre la tarjeta de una reserva. -%>
                 <article class="tarjeta">
+                    <%# Abre la etiqueta con la sala. -%>
                     <p class="etiqueta">
+                        <%# Imprime la sala. -%>
                         <%= reserva.sala %>
+                    <%# Cierra la etiqueta. -%>
                     </p>
+                    <%# Abre el título de la tarjeta. -%>
                     <h2>
+                        <%# Imprime el nombre del estudiante (con escape: seguro ante XSS). -%>
                         <%= reserva.estudiante %>
+                    <%# Cierra el título. -%>
                     </h2>
+                    <%# Abre el párrafo de la fecha con su rótulo en negrita. -%>
                     <p><strong>Fecha:</strong>
+                        <%# Imprime la fecha y, entre paréntesis, el turno. -%>
                         <%= reserva.fecha %> (<%= reserva.turno %>)
+                    <%# Cierra el párrafo. -%>
                     </p>
+                    <%# Abre el párrafo de personas con su rótulo. -%>
                     <p><strong>Personas:</strong>
+                        <%# Imprime la cantidad de personas. -%>
                         <%= reserva.personas %>
+                    <%# Cierra el párrafo. -%>
                     </p>
+                    <%# Enlace al detalle armado con el id: /reservas/6ae3d03... -%>
                     <a href="/reservas/<%= reserva.id %>">Ver detalle</a>
+                <%# Cierra la tarjeta. -%>
                 </article>
+                <%# Cierra la función flecha y el forEach. -%>
                 <% }) %>
+        <%# Cierra la grilla. -%>
         </section>
+        <%# Cierra el if/else. -%>
         <% } %>

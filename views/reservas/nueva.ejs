@@ -1,49 +1,107 @@
+<%# ========================================================================= -%>
+<%# ARCHIVO: views/reservas/nueva.ejs · FORMULARIO DE NUEVA RESERVA -%>
+<%# ------------------------------------------------------------------------- -%>
+<%# La renderizan mostrarFormulario (vacío), validarReserva y el manejador de -%>
+<%# errores (con error y los valores enviados). Recibe titulo, error y -%>
+<%# valores; seccion, salasPermitidas y turnosPermitidos llegan por res.locals. -%>
+<%# -%>
+<%# TEORÍA -%>
+<%# - El atributo name de cada campo es la CLAVE con la que llega en req.body. -%>
+<%# - Las validaciones del navegador (required, type, min, max) solo ayudan al -%>
+<%#   usuario: se pueden saltear. Por eso el servidor vuelve a validar todo. -%>
+<%# - label for="x" se asocia con el campo de id="x": al hacer clic en el texto -%>
+<%#   se activa el campo (y lo anuncian los lectores de pantalla). -%>
+<%# ========================================================================= -%>
+<%# Abre el panel del formulario. -%>
 <section class="panel-formulario">
+    <%# Abre la etiqueta de la sección. -%>
     <p class="etiqueta">
+        <%# Imprime seccion (de res.locals). -%>
         <%= seccion %>
+    <%# Cierra la etiqueta. -%>
     </p>
+    <%# Abre el título. -%>
     <h1>
+        <%# Imprime el titulo. -%>
         <%= titulo %>
+    <%# Cierra el título. -%>
     </h1>
 
+    <%# JavaScript sin imprimir: si hay un mensaje de error (validación fallida)... -%>
     <% if (error) { %>
+        <%# ...lo muestra. role="alert" hace que los lectores de pantalla lo anuncien. -%>
         <p class="error" role="alert">
+            <%# Imprime el mensaje de error con escape. -%>
             <%= error %>
+        <%# Cierra el párrafo. -%>
         </p>
+        <%# Cierra el if. -%>
         <% } %>
 
+            <%# El formulario envía los datos a POST /reservas. El navegador los manda -%>
+            <%# como application/x-www-form-urlencoded, que lee express.urlencoded. -%>
             <form action="/reservas" method="post" class="formulario">
+                <%# Rótulo del campo estudiante. -%>
                 <label for="estudiante">Nombre del estudiante</label>
+                <%# Campo de texto. name="estudiante" es la clave en req.body. value -%>
+                <%# muestra lo que se había escrito si volvió con error (o vacío con -%>
+                <%# ?? ''). required: el navegador no deja enviarlo vacío. -%>
                 <input id="estudiante" name="estudiante" value="<%= valores.estudiante ?? '' %>" required>
 
+                <%# Rótulo del email. -%>
                 <label for="email">Correo electrónico</label>
+                <%# type="email": el navegador revisa que tenga formato de correo. -%>
                 <input id="email" name="email" type="email" value="<%= valores.email ?? '' %>" required>
 
+                <%# Rótulo de la sala. -%>
                 <label for="sala">Sala de estudio</label>
+                <%# Lista desplegable obligatoria. -%>
                 <select id="sala" name="sala" required>
+                    <%# Primera opción con valor vacío: obliga a elegir una sala real. -%>
                     <option value="">Seleccione una sala</option>
+                    <%# Recorre salasPermitidas (viene del modelo por res.locals). -%>
                     <% salasPermitidas.forEach((s)=> { %>
+                        <%# Una opción por sala (esta línea y la siguiente). Si coincide con -%>
+                        <%# la elegida antes, imprime selected para dejarla marcada. -%>
                         <option value="<%= s %>" <%=valores.sala===s ? 'selected' : '' %>><%= s %>
                         </option>
+                        <%# Cierra el forEach. -%>
                         <% }) %>
+                <%# Cierra la lista desplegable. -%>
                 </select>
 
+                <%# Rótulo de la fecha. -%>
                 <label for="fecha">Fecha</label>
+                <%# type="date" muestra un calendario y envía la fecha como texto AAAA-MM-DD. -%>
                 <input id="fecha" name="fecha" type="date" value="<%= valores.fecha ?? '' %>" required>
 
+                <%# Rótulo del turno. -%>
                 <label for="turno">Turno</label>
+                <%# Lista desplegable obligatoria. -%>
                 <select id="turno" name="turno" required>
+                    <%# Opción vacía: obliga a elegir un turno real. -%>
                     <option value="">Seleccione un turno</option>
+                    <%# Recorre turnosPermitidos (viene del modelo por res.locals). -%>
                     <% turnosPermitidos.forEach((t)=> { %>
+                        <%# Una opción por turno (esta línea y la siguiente), marcada si -%>
+                        <%# coincide con la elegida antes. -%>
                         <option value="<%= t %>" <%=valores.turno===t ? 'selected' : '' %>><%= t %>
                         </option>
+                        <%# Cierra el forEach. -%>
                         <% }) %>
+                <%# Cierra la lista desplegable. -%>
                 </select>
 
+                <%# Rótulo de personas. -%>
                 <label for="personas">Cantidad de personas (1 a 6)</label>
+                <%# Campo numérico (esta etiqueta ocupa dos líneas). min="1" y max="6" -%>
+                <%# limitan el valor en el navegador; required lo hace obligatorio. -%>
                 <input id="personas" name="personas" type="number" min="1" max="6" value="<%= valores.personas ?? '' %>"
                     required>
 
+                <%# Botón que envía el formulario. -%>
                 <button type="submit">Confirmar Reserva</button>
+            <%# Cierra el formulario. -%>
             </form>
+<%# Cierra la sección. -%>
 </section>

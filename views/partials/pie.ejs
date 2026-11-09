@@ -1,6 +1,19 @@
+<%# ========================================================================= -%>
+<%# ARCHIVO: views/partials/pie.ejs · PARCIAL DEL PIE DE PÁGINA -%>
+<%# ------------------------------------------------------------------------- -%>
+<%# Se inserta al final de todas las páginas desde el layout. -%>
+<%# ========================================================================= -%>
+<%# Abre el pie de página. -%>
 <footer class="pie">
+    <%# Autora y nombre del TP. &mdash; es la entidad HTML de la raya larga. -%>
     <p>Laura Ivanna Toloza &mdash; TP09 CRUD con MongoDB</p>
+    <%# Párrafo con el identificador de la solicitud (BIB-0001...). Las tres -%>
+    <%# líneas siguientes son un solo párrafo: abre p, small y strong; imprime -%>
+    <%# con escape solicitudId; y cierra strong, small y p. solicitudId viene de -%>
+    <%# res.locals: lo carga el middleware de solicitudes en TODAS las -%>
+    <%# solicitudes, por eso no hace falta pasarlo en cada res.render. -%>
     <p><small>Solicitud ID: <strong>
                 <%= solicitudId %>
             </strong></small></p>
+<%# Cierra el pie. -%>
 </footer>

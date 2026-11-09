@@ -1,10 +1,29 @@
+<%# ========================================================================= -%>
+<%# ARCHIVO: views/no-encontrado.ejs · PÁGINA DE ERROR (404, 400 Y 500) -%>
+<%# ------------------------------------------------------------------------- -%>
+<%# La usan el 404 de app.js, el controlador (reserva inexistente) y el -%>
+<%# manejador de errores (400 y 500). Recibe titulo, mensaje y a veces codigo. -%>
+<%# ========================================================================= -%>
+<%# Sección del mensaje de error. -%>
 <section class="estado">
+    <%# Muestra "ERROR" y el código. locals es el objeto con todas las variables -%>
+    <%# de la vista: escribir locals.codigo en vez de codigo evita un -%>
+    <%# ReferenceError si no se pasó esa variable (el 404 de app.js no la pasa). -%>
+    <%# ?? 404 usa 404 por defecto; el manejador de errores sí la pasa (400 o 500). -%>
     <p class="etiqueta">ERROR <%= locals.codigo ?? 404 %></p>
+    <%# Abre el título del error. -%>
     <h1>
+        <%# Imprime con escape el titulo recibido. -%>
         <%= titulo %>
+    <%# Cierra el título. -%>
     </h1>
+    <%# Abre el párrafo del mensaje. -%>
     <p>
+        <%# Imprime con escape el mensaje explicativo. -%>
         <%= mensaje %>
+    <%# Cierra el párrafo. -%>
     </p>
+    <%# Botón para volver al listado. -%>
     <a class="boton" href="/reservas">Volver al catálogo</a>
+<%# Cierra la sección. -%>
 </section>

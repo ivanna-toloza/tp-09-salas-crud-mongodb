@@ -1,2 +1,11 @@
+# =============================================================================
+# ARCHIVO: .gitignore · ARCHIVOS QUE GIT NO DEBE SUBIR AL REPOSITORIO
+# -----------------------------------------------------------------------------
+# Cada línea es un patrón de archivos o carpetas. Las que empiezan con # son
+# comentarios.
+# =============================================================================
+# node_modules/ tiene las librerías instaladas: es pesado y se regenera con
+# npm install o npm ci a partir de package.json y package-lock.json.
 node_modules/
+# .env tiene la contraseña real de la base de datos: nunca se sube.
 .env
